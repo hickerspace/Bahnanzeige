@@ -12,6 +12,8 @@ class FreightTrainRequest(object):
 
 	def __init__(self, stationID, dt=datetime.datetime.today()):
 
+		self.stationID = stationID
+		self.dt = dt
 		self.trainList = [ ]
 
 		# check arrivals and departures
@@ -52,14 +54,25 @@ class FreightTrainRequest(object):
 			for i in range(0, len(journeys), 1):
 				# ignore "journeys as necessary"
 				if not journeys[i] == "Bedarf":
-					self.trainList.append(FreightTrain(stationID, dt, journeys[i], origins[i], arrivals[i], departures[i]))
+					self.trainList.append(FreightTrain(stationID, self.dt, journeys[i], origins[i], self.timeStringToDateTime(arrivals[i]), self.timeStringToDateTime(departures[i])))
+
+
+	def timeStringToDateTime(self, timeString):
+		hour, minute = timeString.split(":")
+		timeObj = datetime.time(int(hour), int(minute))
+
+		if timeObj >= self.dt.time():
+			return datetime.datetime.combine(self.dt.date(), timeObj)
+		else:
+			return datetime.datetime.combine(self.dt.date() + datetime.timedelta(days=1), timeObj)
+
 
 	def getTrainList(self):
 		return self.trainList
 
 
 def main():
-
+	# return trains for Hildesheim Hbf
 	freightTrains = FreightTrainRequest(180134148)
  
 	for train in freightTrains.getTrainList():
