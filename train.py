@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import datetime
+import re
+
 class Train(object):
  
 	def __init__(self, stationID, dt, name):
@@ -8,7 +11,7 @@ class Train(object):
 		self.stationID = stationID
 		self.dt = dt
 
-		self.name = name
+		self.name = re.sub(" +", " ", name)
 		
 	# replace with something smarter
 	def __str__(self):
@@ -18,19 +21,37 @@ class Train(object):
 class PassengerTrain(Train):
 
 	def __init__(self, stationID, dt, category, product, name, scheduledTime, 
-		direction, scheduledPlatform, actualTime, actualPlatform):
+		direction, scheduledPlatform, actualTime, actualPlatform, prod):
 
 		Train.__init__(self, stationID, dt, name)
 
 		self.category = category
 		self.product = product
-
-		self.scheduledTime = scheduledTime
 		self.direction = direction
+
+		self.scheduledTime = self.timeStringToDateTime(scheduledTime)
 		self.scheduledPlatform = scheduledPlatform
  
-		self.actualTime = actualTime
+		self.actualTime = self.timeStringToDateTime(actualTime)
 		self.actualPlatform = actualPlatform
+
+		self.prod = prod
+
+
+	def timeStringToDateTime(self, timeString):
+
+		if timeString is None:
+			return None
+
+		hour, minute = timeString.split(":")
+		timeObj = datetime.time(int(hour), int(minute))
+
+		if timeObj < self.dt.time():
+			return datetime.datetime.combine(self.dt.date() + datetime.timedelta(days=1), timeObj)
+		else:
+			return datetime.datetime.combine(self.dt.date(), timeObj)
+
+
 
 
 class FreightTrain(Train):
