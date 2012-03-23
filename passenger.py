@@ -17,9 +17,15 @@ class PassengerTrainRequest(object):
  
 		self.trainList = []
  
+		self.doRequest("DEP")
+		self.doRequest("ARR")
+
+
+	def doRequest(self, prod):
+
 		requestStr = """<?xml version='1.0' encoding='iso-8859-1'?>
 <ReqC ver='1.1' prod='JP' lang='de' clientVersion='2.1.6'>
-<STBReq boardType='DEP' detailLevel='2'>
+<STBReq boardType='%s' detailLevel='2'>
 <Time>%s</Time>
 <Period>
 <DateBegin>%s</DateBegin>
@@ -27,7 +33,7 @@ class PassengerTrainRequest(object):
 <TableStation externalId='%s'/>
 <ProductFilter>1111100000000000</ProductFilter>
 </STBReq>
-</ReqC>""" % (dt.strftime("%H:%M:%S"), dt.strftime("%Y%m%d"), dt.strftime("%Y%m%d"), self.stationID)
+</ReqC>""" % (prod, self.dt.strftime("%H:%M:%S"), self.dt.strftime("%Y%m%d"), self.dt.strftime("%Y%m%d"), self.stationID)
  
 		req = urllib2.Request(
 			url="http://reiseauskunft.bahn.de/bin/mgate.exe",
@@ -53,8 +59,10 @@ class PassengerTrainRequest(object):
 				entry.attrib["direction"],
 				entry.attrib["scheduledPlatform"],
 				entry.attrib.get("actualTime", default=""),
-				entry.attrib.get("actualPlatform", default="")))
+				entry.attrib.get("actualPlatform", default=""),
+				prod))
  
+
  
 	def getTrainList(self):
 		return self.trainList
