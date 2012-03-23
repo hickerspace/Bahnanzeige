@@ -58,10 +58,13 @@ class PassengerTrainRequest(object):
 				entry.attrib["scheduledTime"], 
 				entry.attrib["direction"],
 				entry.attrib["scheduledPlatform"],
-				entry.attrib.get("actualTime", default=""),
-				entry.attrib.get("actualPlatform", default=""),
+				entry.attrib.get("actualTime", default=None),
+				entry.attrib.get("actualPlatform", default=None),
 				prod))
  
+
+
+
 
  
 	def getTrainList(self):
