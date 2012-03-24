@@ -71,14 +71,15 @@ class AutoTrainRequest(object):
 			journeys = clickMonthTree.xpath("/html/body/div/table/tr/td/form/table[5]/tbody/tr[3]/td/table/tbody/tr[*]/td/input")
 			journeys = map(lambda journey: urllib.urlencode({ "selLeg1Det" : journey.get("value"), "selLeg1YYYYMM" : self.dt.strftime("%Y%m") }), journeys)
 
-			if len(journeys) == 0:
-				print "no journeys"
-
 			for journey in journeys:
 				# retrieve data for each connection
 				step4 = opener.open("https://buchung.dbautozug.de/book/2.asp", "sd=352867002&submitFrom=&frmName=frmFormAZDB2&DoNext=NEXT&mbPromCode1=&mbClientNum1=&mbClientEmail1=&mbPartnerID1=&mbDepPort11=%s&mbDestPort11=%s&mbDepPort12=&mbDestPort12=&mbSingle1=S&mbDiffL1L2Acc1=&mbNumAdults1=1&mbNumChildren1=0&mbNumInfants1=0&mbVehNum11=1&mbVehNum12=0&mbVehType111=CAR&mbVehType112=&mbVehType113=&mbVehType114=&mbVehType115=&mbVehType116=&mbVehType121=&mbVehType122=&mbVehType123=&mbVehType124=&mbVehType125=&mbVehType126=&onRoof=n&selRoofWidth=135&selVehHeight=158%%2F20050101%%2F20130322%%2Fefb&part2=Y&%s&btnSubmit=Weiter" % (origin[:-2], location[:-2], journey))
 
 				schedule = lxml.html.fromstring(step4.read())
+
+				# skip if an error occurred
+				if len(schedule.xpath("//td[@class='ErrorMessage']")) > 0:
+					continue
 
 				name, trainOrigin = schedule.xpath("/html/body/div/table/tr/td/form/table[3]/tbody/tr[2]/td[2]")[0].text.encode("utf8").replace("\r\n", "").replace("\t", "").replace("\xc2\xa0", "").split(":")
 				destination = schedule.xpath("/html/body/div/table/tr/td/form/table[3]/tbody/tr[2]/td[2]/img")[0].tail.encode('utf8').replace("\r\n", "").replace("\xc2\xa0", "")[:-2]
