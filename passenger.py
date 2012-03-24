@@ -71,7 +71,7 @@ class PassengerTrainRequest(object):
 		return self.trainList
  
 def main():
-	tReq = PassengerTrainRequest(8000169, datetime.datetime(2012, 3, 23, 21, 0, 0)) # id stands for Hildesheim Hbf
+	tReq = PassengerTrainRequest(8000169) # id stands for Hildesheim Hbf
  
 	for train in tReq.getTrainList():
 		print train
