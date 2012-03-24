@@ -63,3 +63,13 @@ class FreightTrain(Train):
 		self.origin = origin
 		self.arrival = arrival
 		self.departure = departure
+
+class AutoTrain(Train):
+
+	def __init__(self, stationID, dt, name, origin, destination, arrival):
+
+		Train.__init__(self, stationID, dt, name)
+
+		self.origin = origin
+		self.destination = destination
+		self.arrival = arrival
