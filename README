@@ -1,3 +1,12 @@
-Anzeige der vorbeifahrenden Zuege.
+Display German trains passing by.
 
-http://hickerspace.org/wiki/Bahnanzeige
+Check out http://hickerspace.org/wiki/Bahnanzeige for more information on this project.
+
+Dependencies:
+* apscheduler (http://packages.python.org/APScheduler/)
+
+Instructions:
+* configure your station and more in trainscheduler.py
+* set a user agent string in autotrain.py, freight.py and passenger.py
+* start the scheduler by executing trainscheduler.py
+* check the logs by executing debug.sh (or debug.sh -f for follow mode)

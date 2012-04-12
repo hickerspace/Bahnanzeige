@@ -6,6 +6,7 @@ import datetime
 import re
 from train import AutoTrain
 
+REQUEST_USERAGENT = ""
 ORIGIN = "L1A"
 DESTINATION = "L1D"
 
@@ -25,6 +26,7 @@ class AutoTrainRequest(object):
 	def request(self, TYPE):
 		cj = cookielib.CookieJar()
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+		opener.addheaders = [("User-Agent", REQUEST_USERAGENT)]
 
 		# 1st step: set station we're interested in and get all connected stations
 		step1 = opener.open("http://buchung.dbautozug.de/book/0.asp?%s=%s" % (TYPE, self.station))

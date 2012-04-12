@@ -10,11 +10,10 @@ REQUEST_USERAGENT = ""
 
 class PassengerTrainRequest(object):
  
-	def __init__(self, stationID, dt=datetime.datetime.today()):
+	def __init__(self, stationID, dt=None):
  
 		self.stationID = stationID
-		self.dt = dt
- 
+		self.dt = dt if dt else datetime.datetime.now()
 		self.trainList = []
  
 		self.doRequest("DEP")
@@ -48,7 +47,12 @@ class PassengerTrainRequest(object):
 		bahnResponseEntries = bahnResponseXML.xpath("//Entries/StationBoardEntry")
  
 		for entry in bahnResponseEntries:
- 
+			# do not return canceled trains
+			infoMessages = entry.xpath("Messages/Message")
+			infoMessages = map(lambda info: info.attrib["text"].encode("utf-8"), infoMessages)
+			if "Zug f\xc3\xa4llt aus" in infoMessages:
+				break
+			 
 			self.trainList.append(PassengerTrain(
 				self.stationID,
 				self.dt,
@@ -56,17 +60,13 @@ class PassengerTrainRequest(object):
 				entry.attrib["product"],
 				entry.attrib["name"],
 				entry.attrib["scheduledTime"], 
-				entry.attrib["direction"],
+				entry.attrib["direction"].encode("utf-8"),
 				entry.attrib["scheduledPlatform"],
 				entry.attrib.get("actualTime", default=None),
 				entry.attrib.get("actualPlatform", default=None),
 				prod))
- 
 
 
-
-
- 
 	def getTrainList(self):
 		return self.trainList
  

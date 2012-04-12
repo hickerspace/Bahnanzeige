@@ -11,7 +11,7 @@ class Train(object):
 		self.stationID = stationID
 		self.dt = dt
 
-		self.name = re.sub(" +", " ", name)
+		self.name = name
 		
 	# replace with something smarter
 	def __str__(self):
@@ -23,7 +23,7 @@ class PassengerTrain(Train):
 	def __init__(self, stationID, dt, category, product, name, scheduledTime, 
 		direction, scheduledPlatform, actualTime, actualPlatform, prod):
 
-		Train.__init__(self, stationID, dt, name)
+		Train.__init__(self, stationID, dt, re.sub(" +", " ", name))
 
 		self.category = category
 		self.product = product
@@ -36,6 +36,11 @@ class PassengerTrain(Train):
 		self.actualPlatform = actualPlatform
 
 		self.prod = prod
+
+		if actualTime:
+			self.delayed = True
+		else:
+			self.delayed = False
 
 
 	def timeStringToDateTime(self, timeString):
@@ -51,6 +56,11 @@ class PassengerTrain(Train):
 		else:
 			return datetime.datetime.combine(self.dt.date(), timeObj)
 
+	def __str__(self):
+		displayPlatform = self.actualPlatform if self.actualPlatform else self.scheduledPlatform
+		delayedStr = " (verspätet)" if self.delayed else ""
+
+		return "%s an Gleis %s nach %s%s" % (self.name, displayPlatform, self.direction, delayedStr)
 
 class FreightTrain(Train):
 
@@ -62,6 +72,10 @@ class FreightTrain(Train):
 		self.arrival = arrival
 		self.departure = departure
 
+	def __str__(self):
+		# FIXME: arrival only
+		return "Güterzug %s von %s" % (self.name, self.origin)
+
 
 class AutoTrain(Train):
 
@@ -72,3 +86,6 @@ class AutoTrain(Train):
 		self.origin = origin
 		self.destination = destination
 		self.arrival = arrival
+
+	def __str__(self):
+		return "Autozug %s von %s nach %s" % (self.name, self.origin, self.destination)
