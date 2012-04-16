@@ -10,7 +10,6 @@ class Train(object):
  
 		self.stationID = stationID
 		self.dt = dt
-
 		self.name = name
 		
 	# replace with something smarter
@@ -27,6 +26,11 @@ class PassengerTrain(Train):
 
 		self.category = category
 		self.product = product
+
+		# correct ugly brackets
+		direction = re.sub(r"(\w)\(", r"\1 (", direction)
+		direction = re.sub(r"\)(\w)", r") \1", direction)
+
 		self.direction = direction
 
 		self.scheduledTime = self.timeStringToDateTime(scheduledTime)
@@ -37,7 +41,8 @@ class PassengerTrain(Train):
 
 		self.prod = prod
 
-		if actualTime:
+		# determine if train is delayed
+		if self.actualTime and self.actualTime != self.scheduledTime:
 			self.delayed = True
 		else:
 			self.delayed = False
@@ -51,6 +56,7 @@ class PassengerTrain(Train):
 		hour, minute = timeString.split(":")
 		timeObj = datetime.time(int(hour), int(minute))
 
+		# determine if train is about to pass by tomorrow or today
 		if timeObj < self.dt.time():
 			return datetime.datetime.combine(self.dt.date() + datetime.timedelta(days=1), timeObj)
 		else:
@@ -58,7 +64,30 @@ class PassengerTrain(Train):
 
 	def __str__(self):
 		displayPlatform = self.actualPlatform if self.actualPlatform else self.scheduledPlatform
-		delayedStr = " (verspätet)" if self.delayed else ""
+
+		# build a delay string, if needed
+		if self.delayed:
+			if self.actualTime > self.scheduledTime:
+				delayDelta = self.actualTime - self.scheduledTime
+				# calculate seconds of timedelta (python >= 2.7 offers timedelta.total_seconds() )
+				delaySeconds = ( (delayDelta.days * 86400) + delayDelta.seconds )
+				
+				hours, remainder = divmod(delaySeconds, 3600)
+				minutes, seconds = divmod(remainder, 60)
+
+				minuteStr = "Minute" if minutes == 1 else "Minuten"
+				hourStr = "Stunde" if hours == 1 else "Stunden"
+				
+				if hours == 0:
+					delayTime = "%d %s" % (minutes, minuteStr)
+				else:
+					delayTime = "%d %s und %d %s" % (hours, hourStr, minutes, minuteStr)
+
+				delayedStr = " (um %s verspätet)" % delayTime
+			else:
+				delayedStr = " (verspätet)"
+		else:
+			delayedStr =  ""
 
 		return "%s an Gleis %s nach %s%s" % (self.name, displayPlatform, self.direction, delayedStr)
 

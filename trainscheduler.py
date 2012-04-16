@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import datetime
 import time
 
@@ -11,7 +14,8 @@ import autotrain
 
 import logging
 
-CHECKBEFORE = 10
+# minutes to check before train passes by
+CHECKBEFORE = 5
 AUTO_TRAIN_STATION_NAME = "Hildesheim"
 PASSENGER_STATION_ID = 8000169
 FREIGHT_STATION_ID = 180134148
@@ -53,18 +57,17 @@ class TrainScheduler(object):
 
 		self.log("Creating initial train schedule..")
 		
-		# passenger
+		# request passenger trains every hour
 		self.scheduler.add_cron_job(self.processPassenger, hour="*/1", minute="0", day="*", month="*", year="*")
-		# freight
+		# request freight trains every day
 		self.scheduler.add_cron_job(self.processFreight, hour="0", minute="2", day="*", month="*", year="*")
-		# autotrain
+		# request auto trains every month
 		self.scheduler.add_cron_job(self.processAutotrain, hour="0", minute="5", day="1", month="*", year="*")
 
 
 	def processPassenger(self):
 		# return trains for station in question
 		tReq = passenger.PassengerTrainRequest(PASSENGER_STATION_ID)
-		self.log("Requesting passenger trains since %s." % tReq.dt)
 	 
 		for train in tReq.getTrainList():
 			trainTime = train.actualTime if (train.actualTime) else train.scheduledTime
@@ -126,6 +129,7 @@ class TrainScheduler(object):
 		jobs = self.scheduler.get_jobs()
 
 		if jobs:
+			# events with the same name (train name) and the next "next run time" are duplicates
 			dups = [job for job in jobs if job.name == event.job.name and job.next_run_time == event.job.next_run_time]
 			if len(dups) > 1:
 				self.log("Unscheduling %s." % event.job)
@@ -135,7 +139,7 @@ class TrainScheduler(object):
 	def output(self, train):
 		self.log("OUTPUT: %s" % train)
 		f = open(OUTPUT_FILE, "a")
-		f.write("\n%s" % train)
+		f.write("%s\n" % train)
 		f.close()
 
 
